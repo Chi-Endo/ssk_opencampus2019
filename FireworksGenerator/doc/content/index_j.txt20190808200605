@@ -100,10 +100,8 @@ FireworksGeneratorは ``FireworksGeneratorComp`` を実行（ ``${prefix}/compon
 ================ ================== ================ ====
 SCREEN_SIZE_W    int                1640             
 SCREEN_SIZE_H    int                1200             
-WINDOW_SIZE_W    int                1280             
-WINDOW_SIZE_H    int                960              
-OVERLAY_IMAGE_SIZE_H int                640              
-OVERLAY_IMAGE_SIZE_W int                347              
+IMAGE_SIZE_W     int                1280             
+IMAGE_SIZE_H     int                960              
 ================ ================== ================ ====
 
 ポート

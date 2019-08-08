@@ -10,7 +10,7 @@
 #   --module-desc='FireworksGenerator' --module-version=1.0.0 --module-vendor=chi 
 #   --module-category=Category --module-comp-type=STATIC 
 #   --module-act-type=PERIODIC --module-max-inst=1 
-#   --config=SCREEN_SIZE_W:int:1640 --config=SCREEN_SIZE_H:int:1200 --config=WINDOW_SIZE_W:int:1280 --config=WINDOW_SIZE_H:int:960 --config=OVERLAY_IMAGE_SIZE_H:int:640 --config=OVERLAY_IMAGE_SIZE_W:int:347 
+#   --config=SCREEN_SIZE_W:int:1640 --config=SCREEN_SIZE_H:int:1200 --config=IMAGE_SIZE_W:int:1280 --config=IMAGE_SIZE_H:int:960 
 #   --inport=Pos:RTC::TimedLongSeq 
 
 
@@ -123,7 +123,7 @@ Lang Type:
 		Range:           
 		Constraint:      
 
-		Name:             WINDOW_SIZE_W
+		Name:             IMAGE_SIZE_W
 		Description:     
 		Type:            int
 		DefaultValue:     1280
@@ -131,26 +131,10 @@ Lang Type:
 		Range:           
 		Constraint:      
 
-		Name:             WINDOW_SIZE_H
+		Name:             IMAGE_SIZE_H
 		Description:     
 		Type:            int
 		DefaultValue:     960
-		Unit:            
-		Range:           
-		Constraint:      
-
-		Name:             OVERLAY_IMAGE_SIZE_H
-		Description:     
-		Type:            int
-		DefaultValue:     640
-		Unit:            
-		Range:           
-		Constraint:      
-
-		Name:             OVERLAY_IMAGE_SIZE_W
-		Description:     
-		Type:            int
-		DefaultValue:     347
 		Unit:            
 		Range:           
 		Constraint:      

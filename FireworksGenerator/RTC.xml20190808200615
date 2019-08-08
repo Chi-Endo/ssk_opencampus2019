@@ -26,16 +26,10 @@
         <rtc:Configuration xsi:type="rtcExt:configuration_ext" rtcExt:variableName="" rtc:unit="" rtc:defaultValue="1200" rtc:type="int" rtc:name="SCREEN_SIZE_H">
             <rtcExt:Properties rtcExt:value="text" rtcExt:name="__widget__"/>
         </rtc:Configuration>
-        <rtc:Configuration xsi:type="rtcExt:configuration_ext" rtcExt:variableName="" rtc:unit="" rtc:defaultValue="1280" rtc:type="int" rtc:name="WINDOW_SIZE_W">
+        <rtc:Configuration xsi:type="rtcExt:configuration_ext" rtcExt:variableName="" rtc:unit="" rtc:defaultValue="1280" rtc:type="int" rtc:name="IMAGE_SIZE_W">
             <rtcExt:Properties rtcExt:value="text" rtcExt:name="__widget__"/>
         </rtc:Configuration>
-        <rtc:Configuration xsi:type="rtcExt:configuration_ext" rtcExt:variableName="" rtc:unit="" rtc:defaultValue="960" rtc:type="int" rtc:name="WINDOW_SIZE_H">
-            <rtcExt:Properties rtcExt:value="text" rtcExt:name="__widget__"/>
-        </rtc:Configuration>
-        <rtc:Configuration xsi:type="rtcExt:configuration_ext" rtcExt:variableName="" rtc:unit="" rtc:defaultValue="640" rtc:type="int" rtc:name="OVERLAY_IMAGE_SIZE_H">
-            <rtcExt:Properties rtcExt:value="text" rtcExt:name="__widget__"/>
-        </rtc:Configuration>
-        <rtc:Configuration xsi:type="rtcExt:configuration_ext" rtcExt:variableName="" rtc:unit="" rtc:defaultValue="347" rtc:type="int" rtc:name="OVERLAY_IMAGE_SIZE_W">
+        <rtc:Configuration xsi:type="rtcExt:configuration_ext" rtcExt:variableName="" rtc:unit="" rtc:defaultValue="960" rtc:type="int" rtc:name="IMAGE_SIZE_H">
             <rtcExt:Properties rtcExt:value="text" rtcExt:name="__widget__"/>
         </rtc:Configuration>
     </rtc:ConfigurationSet>

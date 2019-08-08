@@ -42,24 +42,18 @@ fireworksgenerator_spec = ["implementation_id", "FireworksGenerator",
 		 "lang_type",         "SCRIPT",
 		 "conf.default.SCREEN_SIZE_W", "1640",
 		 "conf.default.SCREEN_SIZE_H", "1200",
-		 "conf.default.WINDOW_SIZE_W", "1280",
-		 "conf.default.WINDOW_SIZE_H", "960",
-		 "conf.default.OVERLAY_IMAGE_SIZE_H", "640",
-		 "conf.default.OVERLAY_IMAGE_SIZE_W", "347",
+		 "conf.default.IMAGE_SIZE_W", "1280",
+		 "conf.default.IMAGE_SIZE_H", "960",
 
 		 "conf.__widget__.SCREEN_SIZE_W", "text",
 		 "conf.__widget__.SCREEN_SIZE_H", "text",
-		 "conf.__widget__.WINDOW_SIZE_W", "text",
-		 "conf.__widget__.WINDOW_SIZE_H", "text",
-		 "conf.__widget__.OVERLAY_IMAGE_SIZE_H", "text",
-		 "conf.__widget__.OVERLAY_IMAGE_SIZE_W", "text",
+		 "conf.__widget__.IMAGE_SIZE_W", "text",
+		 "conf.__widget__.IMAGE_SIZE_H", "text",
 
          "conf.__type__.SCREEN_SIZE_W", "int",
          "conf.__type__.SCREEN_SIZE_H", "int",
-         "conf.__type__.WINDOW_SIZE_W", "int",
-         "conf.__type__.WINDOW_SIZE_H", "int",
-         "conf.__type__.OVERLAY_IMAGE_SIZE_H", "int",
-         "conf.__type__.OVERLAY_IMAGE_SIZE_W", "int",
+         "conf.__type__.IMAGE_SIZE_W", "int",
+         "conf.__type__.IMAGE_SIZE_H", "int",
 
 		 ""]
 # </rtc-template>
@@ -103,28 +97,16 @@ class FireworksGenerator(OpenRTM_aist.DataFlowComponentBase):
 		self._SCREEN_SIZE_H = [1200]
 		"""
 		
-		 - Name:  WINDOW_SIZE_W
+		 - Name:  IMAGE_SIZE_W
 		 - DefaultValue: 1280
 		"""
-		self._WINDOW_SIZE_W = [1280]
+		self._IMAGE_SIZE_W = [1280]
 		"""
 		
-		 - Name:  WINDOW_SIZE_H
+		 - Name:  IMAGE_SIZE_H
 		 - DefaultValue: 960
 		"""
-		self._WINDOW_SIZE_H = [960]
-		"""
-		
-		 - Name:  OVERLAY_IMAGE_SIZE_H
-		 - DefaultValue: 640
-		"""
-		self._OVERLAY_IMAGE_SIZE_H = [640]
-		"""
-		
-		 - Name:  OVERLAY_IMAGE_SIZE_W
-		 - DefaultValue: 347
-		"""
-		self._OVERLAY_IMAGE_SIZE_W = [347]
+		self._IMAGE_SIZE_H = [960]
 		
 		# </rtc-template>
 
@@ -142,10 +124,8 @@ class FireworksGenerator(OpenRTM_aist.DataFlowComponentBase):
 		# Bind variables and configuration variable
 		self.bindParameter("SCREEN_SIZE_W", self._SCREEN_SIZE_W, "1640")
 		self.bindParameter("SCREEN_SIZE_H", self._SCREEN_SIZE_H, "1200")
-		self.bindParameter("WINDOW_SIZE_W", self._WINDOW_SIZE_W, "1280")
-		self.bindParameter("WINDOW_SIZE_H", self._WINDOW_SIZE_H, "960")
-		self.bindParameter("OVERLAY_IMAGE_SIZE_H", self._OVERLAY_IMAGE_SIZE_H, "640")
-		self.bindParameter("OVERLAY_IMAGE_SIZE_W", self._OVERLAY_IMAGE_SIZE_W, "347")
+		self.bindParameter("IMAGE_SIZE_W", self._IMAGE_SIZE_W, "1280")
+		self.bindParameter("IMAGE_SIZE_H", self._IMAGE_SIZE_H, "960")
 		
 		# Set InPort buffers
 		self.addInPort("Pos",self._PosIn)
