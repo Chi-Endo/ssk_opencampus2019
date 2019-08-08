@@ -1,0 +1,54 @@
+# CognizeTouch CMake config file
+#
+# This file sets the following variables:
+# CognizeTouch_FOUND - Always TRUE.
+# CognizeTouch_INCLUDE_DIRS - Directories containing the CognizeTouch include files.
+# CognizeTouch_IDL_DIRS - Directories containing the CognizeTouch IDL files.
+# CognizeTouch_LIBRARIES - Libraries needed to use CognizeTouch.
+# CognizeTouch_DEFINITIONS - Compiler flags for CognizeTouch.
+# CognizeTouch_VERSION - The version of CognizeTouch found.
+# CognizeTouch_VERSION_MAJOR - The major version of CognizeTouch found.
+# CognizeTouch_VERSION_MINOR - The minor version of CognizeTouch found.
+# CognizeTouch_VERSION_REVISION - The revision version of CognizeTouch found.
+# CognizeTouch_VERSION_CANDIDATE - The candidate version of CognizeTouch found.
+
+message(STATUS "Found CognizeTouch-@PROJECT_VERSION@")
+set(CognizeTouch_FOUND TRUE)
+
+find_package(<dependency> REQUIRED)
+
+#set(CognizeTouch_INCLUDE_DIRS
+#    "@CMAKE_INSTALL_PREFIX@/include/@PROJECT_NAME_LOWER@-@PROJECT_VERSION_MAJOR@"
+#    ${<dependency>_INCLUDE_DIRS}
+#    )
+#
+#set(CognizeTouch_IDL_DIRS
+#    "@CMAKE_INSTALL_PREFIX@/include/@PROJECT_NAME_LOWER@-@PROJECT_VERSION_MAJOR@/idl")
+set(CognizeTouch_INCLUDE_DIRS
+    "@CMAKE_INSTALL_PREFIX@/include/@CPACK_PACKAGE_FILE_NAME@"
+    ${<dependency>_INCLUDE_DIRS}
+    )
+set(CognizeTouch_IDL_DIRS
+    "@CMAKE_INSTALL_PREFIX@/include/@CPACK_PACKAGE_FILE_NAME@/idl")
+
+
+if(WIN32)
+    set(CognizeTouch_LIBRARIES
+        "@CMAKE_INSTALL_PREFIX@/@LIB_INSTALL_DIR@/@CMAKE_SHARED_LIBRARY_PREFIX@@PROJECT_NAME_LOWER@@CMAKE_STATIC_LIBRARY_SUFFIX@"
+        ${<dependency>_LIBRARIES}
+        )
+else(WIN32)
+    set(CognizeTouch_LIBRARIES
+        "@CMAKE_INSTALL_PREFIX@/@LIB_INSTALL_DIR@/@CMAKE_SHARED_LIBRARY_PREFIX@@PROJECT_NAME_LOWER@@CMAKE_SHARED_LIBRARY_SUFFIX@"
+        ${<dependency>_LIBRARIES}
+        )
+endif(WIN32)
+
+set(CognizeTouch_DEFINITIONS ${<dependency>_DEFINITIONS})
+
+set(CognizeTouch_VERSION @PROJECT_VERSION@)
+set(CognizeTouch_VERSION_MAJOR @PROJECT_VERSION_MAJOR@)
+set(CognizeTouch_VERSION_MINOR @PROJECT_VERSION_MINOR@)
+set(CognizeTouch_VERSION_REVISION @PROJECT_VERSION_REVISION@)
+set(CognizeTouch_VERSION_CANDIDATE @PROJECT_VERSION_CANDIDATE@)
+

@@ -1,0 +1,177 @@
+﻿// -*- C++ -*-
+/*!
+ * @file  CognizeTouch.cpp
+ * @brief CognizeTouch
+ * @date $Date$
+ *
+ * $Id$
+ */
+
+#include "CognizeTouch.h"
+
+// Module specification
+// <rtc-template block="module_spec">
+static const char* cognizetouch_spec[] =
+  {
+    "implementation_id", "CognizeTouch",
+    "type_name",         "CognizeTouch",
+    "description",       "CognizeTouch",
+    "version",           "1.0.0",
+    "vendor",            "chi",
+    "category",          "Category",
+    "activity_type",     "PERIODIC",
+    "kind",              "DataFlowComponent",
+    "max_instance",      "1",
+    "language",          "C++",
+    "lang_type",         "compile",
+    // Configuration variables
+    "conf.default.INTERVAL_TIME", "1.0",
+
+    // Widget
+    "conf.__widget__.INTERVAL_TIME", "text",
+    // Constraints
+
+    "conf.__type__.INTERVAL_TIME", "float",
+
+    ""
+  };
+// </rtc-template>
+
+/*!
+ * @brief constructor
+ * @param manager Maneger Object
+ */
+CognizeTouch::CognizeTouch(RTC::Manager* manager)
+    // <rtc-template block="initializer">
+  : RTC::DataFlowComponentBase(manager),
+    m_PosIn("Pos", m_Pos)
+
+    // </rtc-template>
+{
+}
+
+/*!
+ * @brief destructor
+ */
+CognizeTouch::~CognizeTouch()
+{
+}
+
+
+
+RTC::ReturnCode_t CognizeTouch::onInitialize()
+{
+  // Registration: InPort/OutPort/Service
+  // <rtc-template block="registration">
+  // Set InPort buffers
+  addInPort("Pos", m_PosIn);
+  
+  // Set OutPort buffer
+  
+  // Set service provider to Ports
+  
+  // Set service consumers to Ports
+  
+  // Set CORBA Service Ports
+  
+  // </rtc-template>
+
+  // <rtc-template block="bind_config">
+  // Bind variables and configuration variable
+  bindParameter("INTERVAL_TIME", m_INTERVAL_TIME, "1.0");
+  // </rtc-template>
+  
+  return RTC::RTC_OK;
+}
+
+/*
+RTC::ReturnCode_t CognizeTouch::onFinalize()
+{
+  return RTC::RTC_OK;
+}
+*/
+
+/*
+RTC::ReturnCode_t CognizeTouch::onStartup(RTC::UniqueId ec_id)
+{
+  return RTC::RTC_OK;
+}
+*/
+
+/*
+RTC::ReturnCode_t CognizeTouch::onShutdown(RTC::UniqueId ec_id)
+{
+  return RTC::RTC_OK;
+}
+*/
+
+
+RTC::ReturnCode_t CognizeTouch::onActivated(RTC::UniqueId ec_id)
+{
+  return RTC::RTC_OK;
+}
+
+/*
+RTC::ReturnCode_t CognizeTouch::onDeactivated(RTC::UniqueId ec_id)
+{
+  return RTC::RTC_OK;
+}
+*/
+
+
+RTC::ReturnCode_t CognizeTouch::onExecute(RTC::UniqueId ec_id)
+{
+  return RTC::RTC_OK;
+}
+
+/*
+RTC::ReturnCode_t CognizeTouch::onAborting(RTC::UniqueId ec_id)
+{
+  return RTC::RTC_OK;
+}
+*/
+
+/*
+RTC::ReturnCode_t CognizeTouch::onError(RTC::UniqueId ec_id)
+{
+  return RTC::RTC_OK;
+}
+*/
+
+/*
+RTC::ReturnCode_t CognizeTouch::onReset(RTC::UniqueId ec_id)
+{
+  return RTC::RTC_OK;
+}
+*/
+
+/*
+RTC::ReturnCode_t CognizeTouch::onStateUpdate(RTC::UniqueId ec_id)
+{
+  return RTC::RTC_OK;
+}
+*/
+
+/*
+RTC::ReturnCode_t CognizeTouch::onRateChanged(RTC::UniqueId ec_id)
+{
+  return RTC::RTC_OK;
+}
+*/
+
+
+
+extern "C"
+{
+ 
+  void CognizeTouchInit(RTC::Manager* manager)
+  {
+    coil::Properties profile(cognizetouch_spec);
+    manager->registerFactory(profile,
+                             RTC::Create<CognizeTouch>,
+                             RTC::Delete<CognizeTouch>);
+  }
+  
+};
+
+
