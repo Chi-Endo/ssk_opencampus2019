@@ -17,6 +17,17 @@ sys.path.append(".")
 import RTC
 import OpenRTM_aist
 
+import cv2 as cv
+import numpy as np
+from PIL import Image
+import random
+import os
+import glob
+
+global deco
+global image
+global cv_background_image
+global cv_overlay_image
 
 # Import Service implementation class
 # <rtc-template block="service_impl">
@@ -54,15 +65,66 @@ fireworksgenerator_spec = ["implementation_id", "FireworksGenerator",
 		 "conf.__widget__.OVERLAY_IMAGE_SIZE_H", "text",
 		 "conf.__widget__.OVERLAY_IMAGE_SIZE_W", "text",
 
-         "conf.__type__.SCREEN_SIZE_W", "int",
-         "conf.__type__.SCREEN_SIZE_H", "int",
-         "conf.__type__.WINDOW_SIZE_W", "int",
-         "conf.__type__.WINDOW_SIZE_H", "int",
-         "conf.__type__.OVERLAY_IMAGE_SIZE_H", "int",
-         "conf.__type__.OVERLAY_IMAGE_SIZE_W", "int",
+		 "conf.__type__.SCREEN_SIZE_W", "int",
+		 "conf.__type__.SCREEN_SIZE_H", "int",
+		 "conf.__type__.WINDOW_SIZE_W", "int",
+		 "conf.__type__.WINDOW_SIZE_H", "int",
+		 "conf.__type__.OVERLAY_IMAGE_SIZE_H", "int",
+		 "conf.__type__.OVERLAY_IMAGE_SIZE_W", "int",
 
 		 ""]
 # </rtc-template>
+
+class CvOverlayImage(object):
+	"""
+	[summary]
+		OpenCV形式の画像に指定画像を重ねる
+	"""
+
+	def __init__(self):
+		pass
+
+	@classmethod
+	def overlay(
+		cls,
+		cv_background_image,
+		cv_overlay_image,
+		point,
+		):
+		"""
+		[summary]
+			OpenCV形式の画像に指定画像を重ねる
+		Parameters
+		----------
+		cv_background_image : [OpenCV Image]
+		cv_overlay_image : [OpenCV Image]
+		point : [(x, y)]
+		Returns : [OpenCV Image]
+		"""
+		overlay_height, overlay_width = cv_overlay_image.shape[:2]
+
+		# OpenCV形式の画像をPIL形式に変換(α値含む)
+		# 背景画像
+		cv_rgb_bg_image = cv.cvtColor(cv_background_image, cv.COLOR_BGR2RGB)
+		pil_rgb_bg_image = Image.fromarray(cv_rgb_bg_image)
+		pil_rgba_bg_image = pil_rgb_bg_image.convert('RGBA')
+		# オーバーレイ画像
+		cv_rgb_ol_image = cv.cvtColor(cv_overlay_image, cv.COLOR_BGRA2RGBA)
+		pil_rgb_ol_image = Image.fromarray(cv_rgb_ol_image)
+		pil_rgba_ol_image = pil_rgb_ol_image.convert('RGBA')
+
+		# composite()は同サイズ画像同士が必須のため、合成用画像を用意
+		pil_rgba_bg_temp = Image.new('RGBA', pil_rgba_bg_image.size,
+										(255, 255, 255, 0))
+		# 座標を指定し重ね合わせる
+		pil_rgba_bg_temp.paste(pil_rgba_ol_image, point, pil_rgba_ol_image)
+		result_image = \
+			Image.alpha_composite(pil_rgba_bg_image, pil_rgba_bg_temp)
+
+		# OpenCV形式画像へ変換
+		cv_bgr_result_image = cv.cvtColor(np.asarray(result_image), cv.COLOR_RGBA2BGRA)
+
+		return cv_bgr_result_image
 
 ##
 # @class FireworksGenerator
@@ -211,7 +273,54 @@ class FireworksGenerator(OpenRTM_aist.DataFlowComponentBase):
 	#
 	#
 	def onActivated(self, ec_id):
-	
+		print("onActivated")
+		global deco
+		global image
+		global cv_background_image
+		global cv_overlay_image
+		global filelist
+		global plist
+		# global overlay_size_x
+		# global overlay_size_y
+		global image_list
+
+
+		cv_background_image = cv.imread("srcImage\\base\\" + "toyosuC2.jpg",cv.IMREAD_UNCHANGED)
+		#cv_background_image = cv.imread("srcImage\\base\\" + "ohmiyaC.jpg",cv.IMREAD_UNCHANGED)
+		image = cv_background_image
+		
+		path = "srcImage\\deco\\"
+		filelist = []
+		for f in os.listdir(path):
+			if os.path.isdir(os.path.join(path, f)):
+				filelist.append(f)
+		print(filelist)
+
+		plist = []
+
+		# overlay_size_x = 640
+		# overlay_size_y = 347
+
+		# 画像をimreadして配列に保存
+		# cv_overlay_image = cv.resize(cv_overlay_image, dsize=(overlay_size, overlay_size))
+		image_list = []
+		for f_num in filelist:
+			images = []
+			i_path = "srcImage\\deco\\" + f_num + "\\*.png"
+			for i_num in glob.glob(i_path):
+				# print(i_num) # 読み込む画像のpath
+				img = cv.imread(i_num, cv.IMREAD_UNCHANGED)
+				# print(img)
+				# img = cv.resize(img, dsize=(960, 540))
+				# img = cv.resize(img, (overlay_size_x, overlay_size_y))
+				img = cv.resize(img, (self._OVERLAY_IMAGE_SIZE_W[0], self._OVERLAY_IMAGE_SIZE_H[0]))
+				images.append(img)
+			image_list.append(images)
+		print("complete image load")
+		cv.namedWindow("decorate",cv.WINDOW_KEEPRATIO)
+		cv.imshow("decorate", image)
+		cv.waitKey(0)
+
 		return RTC.RTC_OK
 	
 	##
@@ -225,7 +334,8 @@ class FireworksGenerator(OpenRTM_aist.DataFlowComponentBase):
 	#
 	#
 	def onDeactivated(self, ec_id):
-	
+		print("onDeactivated")
+		cv.destroyAllWindows()
 		return RTC.RTC_OK
 	
 	##
@@ -239,7 +349,48 @@ class FireworksGenerator(OpenRTM_aist.DataFlowComponentBase):
 	#
 	#
 	def onExecute(self, ec_id):
-	
+		global deco
+		global image
+		global cv_background_image
+		global cv_overlay_image
+		global filelist
+		global plist
+		# global overlay_size_x
+		# global overlay_size_y
+		global image_list
+		# width = 1920
+		# height = 1080
+		# width = 1280
+		# height = 960
+		# screen_width = 1640
+
+
+		if self._LRF_dataIn.isNew():
+			print("isNew")
+			Pos = self._PosIn.read()
+			x = int(Pos.data[0] * (self._WINDOW_SIZE_W[0] / self._SCREEN_SIZE_W[0]))
+			y = int(Pos.data[1] * (self._WINDOW_SIZE_H[0] / self._SCREEN_SIZE_H[0]))
+			if 0.5*self._OVERLAY_IMAGE_SIZE_W[0] < x < self._WINDOW_SIZE_W[0] - 0.5*self._OVERLAY_IMAGE_SIZE_W[0] and 0.5*self._OVERLAY_IMAGE_SIZE_H[0] < y < self._WINDOW_SIZE_H[0] - 0.5*self._OVERLAY_IMAGE_SIZE_H[0]:
+				plist.append([x,y,random.randrange(len(filelist)),0])
+		if not len(plist) == 0:
+			print(plist)
+			for flist in plist:
+				point = (flist[0] - int(0.5 * self._OVERLAY_IMAGE_SIZE_W[0]),flist[1] - int(0.5 * self._OVERLAY_IMAGE_SIZE_H[0]))#座標が中心に来る
+				cv_overlay_image = image_list[flist[2]][flist[3]]
+				flist[3] += 1
+				print(flist[3])
+				image = CvOverlayImage.overlay(image, cv_overlay_image,point)
+			cv.imshow("decorate", cv.resize(image, (1280, 960)))
+			# print("imshow")
+			cv.waitKey(1)
+			# print("waitkey")
+			image = cv_background_image
+			# print("background_image\n")
+			print("end\n")
+
+			if plist[0][3] >= 60:
+				plist.remove(plist[0])
+				print("remove")
 		return RTC.RTC_OK
 	
 	###
