@@ -29,6 +29,7 @@ global image
 global cv_background_image
 global cv_overlay_image
 
+
 # Import Service implementation class
 # <rtc-template block="service_impl">
 
@@ -55,8 +56,9 @@ fireworksgenerator_spec = ["implementation_id", "FireworksGenerator",
 		 "conf.default.SCREEN_SIZE_H", "1200",
 		 "conf.default.WINDOW_SIZE_W", "1280",
 		 "conf.default.WINDOW_SIZE_H", "960",
-		 "conf.default.OVERLAY_IMAGE_SIZE_H", "640",
-		 "conf.default.OVERLAY_IMAGE_SIZE_W", "347",
+		 "conf.default.OVERLAY_IMAGE_SIZE_H", "347",
+		 "conf.default.OVERLAY_IMAGE_SIZE_W", "640",
+		 "conf.default.GAP", "75",
 
 		 "conf.__widget__.SCREEN_SIZE_W", "text",
 		 "conf.__widget__.SCREEN_SIZE_H", "text",
@@ -64,17 +66,18 @@ fireworksgenerator_spec = ["implementation_id", "FireworksGenerator",
 		 "conf.__widget__.WINDOW_SIZE_H", "text",
 		 "conf.__widget__.OVERLAY_IMAGE_SIZE_H", "text",
 		 "conf.__widget__.OVERLAY_IMAGE_SIZE_W", "text",
+		 "conf.__widget__.GAP", "text",
 
-		 "conf.__type__.SCREEN_SIZE_W", "int",
-		 "conf.__type__.SCREEN_SIZE_H", "int",
-		 "conf.__type__.WINDOW_SIZE_W", "int",
-		 "conf.__type__.WINDOW_SIZE_H", "int",
-		 "conf.__type__.OVERLAY_IMAGE_SIZE_H", "int",
-		 "conf.__type__.OVERLAY_IMAGE_SIZE_W", "int",
+         "conf.__type__.SCREEN_SIZE_W", "int",
+         "conf.__type__.SCREEN_SIZE_H", "int",
+         "conf.__type__.WINDOW_SIZE_W", "int",
+         "conf.__type__.WINDOW_SIZE_H", "int",
+         "conf.__type__.OVERLAY_IMAGE_SIZE_H", "int",
+         "conf.__type__.OVERLAY_IMAGE_SIZE_W", "int",
+         "conf.__type__.GAP", "int",
 
 		 ""]
 # </rtc-template>
-
 class CvOverlayImage(object):
 	"""
 	[summary]
@@ -123,7 +126,6 @@ class CvOverlayImage(object):
 
 		# OpenCV形式画像へ変換
 		cv_bgr_result_image = cv.cvtColor(np.asarray(result_image), cv.COLOR_RGBA2BGRA)
-
 		return cv_bgr_result_image
 
 ##
@@ -178,15 +180,21 @@ class FireworksGenerator(OpenRTM_aist.DataFlowComponentBase):
 		"""
 		
 		 - Name:  OVERLAY_IMAGE_SIZE_H
-		 - DefaultValue: 640
+		 - DefaultValue: 347
 		"""
-		self._OVERLAY_IMAGE_SIZE_H = [640]
+		self._OVERLAY_IMAGE_SIZE_H = [347]
 		"""
 		
 		 - Name:  OVERLAY_IMAGE_SIZE_W
-		 - DefaultValue: 347
+		 - DefaultValue: 640
 		"""
-		self._OVERLAY_IMAGE_SIZE_W = [347]
+		self._OVERLAY_IMAGE_SIZE_W = [640]
+		"""
+		
+		 - Name:  GAP
+		 - DefaultValue: 75
+		"""
+		self._GAP = [75]
 		
 		# </rtc-template>
 
@@ -206,8 +214,9 @@ class FireworksGenerator(OpenRTM_aist.DataFlowComponentBase):
 		self.bindParameter("SCREEN_SIZE_H", self._SCREEN_SIZE_H, "1200")
 		self.bindParameter("WINDOW_SIZE_W", self._WINDOW_SIZE_W, "1280")
 		self.bindParameter("WINDOW_SIZE_H", self._WINDOW_SIZE_H, "960")
-		self.bindParameter("OVERLAY_IMAGE_SIZE_H", self._OVERLAY_IMAGE_SIZE_H, "640")
-		self.bindParameter("OVERLAY_IMAGE_SIZE_W", self._OVERLAY_IMAGE_SIZE_W, "347")
+		self.bindParameter("OVERLAY_IMAGE_SIZE_H", self._OVERLAY_IMAGE_SIZE_H, "347")
+		self.bindParameter("OVERLAY_IMAGE_SIZE_W", self._OVERLAY_IMAGE_SIZE_W, "640")
+		self.bindParameter("GAP", self._GAP, "75")
 		
 		# Set InPort buffers
 		self.addInPort("Pos",self._PosIn)
@@ -365,13 +374,13 @@ class FireworksGenerator(OpenRTM_aist.DataFlowComponentBase):
 		# screen_width = 1640
 
 
-		if self._LRF_dataIn.isNew():
+		if self._PosIn.isNew():
 			print("isNew")
 			Pos = self._PosIn.read()
-			x = int(Pos.data[0] * (self._WINDOW_SIZE_W[0] / self._SCREEN_SIZE_W[0]))
-			y = int(Pos.data[1] * (self._WINDOW_SIZE_H[0] / self._SCREEN_SIZE_H[0]))
-			if 0.5*self._OVERLAY_IMAGE_SIZE_W[0] < x < self._WINDOW_SIZE_W[0] - 0.5*self._OVERLAY_IMAGE_SIZE_W[0] and 0.5*self._OVERLAY_IMAGE_SIZE_H[0] < y < self._WINDOW_SIZE_H[0] - 0.5*self._OVERLAY_IMAGE_SIZE_H[0]:
-				plist.append([x,y,random.randrange(len(filelist)),0])
+			x = int(self._WINDOW_SIZE_W[0] - (Pos.data[0] * (self._WINDOW_SIZE_W[0] / self._SCREEN_SIZE_W[0])))
+			y = int((Pos.data[1] + self._GAP[0]) * (self._WINDOW_SIZE_H[0] / self._SCREEN_SIZE_H[0]))
+			# if 0.5*self._OVERLAY_IMAGE_SIZE_W[0] < x < self._WINDOW_SIZE_W[0] - 0.5*self._OVERLAY_IMAGE_SIZE_W[0] and 0.5*self._OVERLAY_IMAGE_SIZE_H[0] < y < self._WINDOW_SIZE_H[0] - 0.5*self._OVERLAY_IMAGE_SIZE_H[0]:
+			plist.append([x,y,random.randrange(len(filelist)),0])
 		if not len(plist) == 0:
 			print(plist)
 			for flist in plist:
@@ -380,7 +389,8 @@ class FireworksGenerator(OpenRTM_aist.DataFlowComponentBase):
 				flist[3] += 1
 				print(flist[3])
 				image = CvOverlayImage.overlay(image, cv_overlay_image,point)
-			cv.imshow("decorate", cv.resize(image, (1280, 960)))
+			# cv.imshow("decorate", cv.resize(image, (1280, 960)))
+			cv.imshow("decorate", image)
 			# print("imshow")
 			cv.waitKey(1)
 			# print("waitkey")
