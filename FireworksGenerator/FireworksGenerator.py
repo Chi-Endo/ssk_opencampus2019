@@ -108,8 +108,23 @@ class CvOverlayImage(object):
 		"""
 		print("overlay")
 		overlay_height, overlay_width = cv_overlay_image.shape[:2]
-
+		background_height, background_width = cv_background_image.shape[:2]
+		
 		cv_bgr_result_image = cv_background_image.copy()
+
+		# x座標がoverlay不可の範囲の時
+		if point[0] < 0:
+			point[0] = 0
+		if point[0] > background_width - overlay_width:
+			print("overlay12")
+			point[0] = background_width - overlay_width
+		# ｙ座標がoverlay不可の範囲の時
+		if point[1] < 0:
+			point[1] = 0
+		if point[1] > background_height - overlay_height:
+			print("overlay14")
+			point[1] = background_height - overlay_height
+		
 
 		print("overlay2")
 		cv_bgr_result_image[point[1]:overlay_height + point[1],point[0]:overlay_width + point[0]] *= 1 - cv_mask_image
@@ -380,7 +395,7 @@ class FireworksGenerator(OpenRTM_aist.DataFlowComponentBase):
 				cv_overlay_image = image_list[flist[2]][flist[3]]
 				cv_mask_image = mask_list[flist[2]][flist[3]]
 				flist[3] += 1
-				print(flist[3])
+				# print(flist[3])
 				image = CvOverlayImage.overlay(image, cv_overlay_image, cv_mask_image, point)
 			# cv.imshow("decorate", cv.resize(image, (1280, 960)))
 			cv.imshow("decorate", image)
