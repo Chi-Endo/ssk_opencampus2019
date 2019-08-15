@@ -92,6 +92,7 @@ class CvOverlayImage(object):
 		cls,
 		cv_background_image,
 		cv_overlay_image,
+		cv_mask_image,
 		point,
 		):
 		"""
@@ -101,31 +102,20 @@ class CvOverlayImage(object):
 		----------
 		cv_background_image : [OpenCV Image]
 		cv_overlay_image : [OpenCV Image]
+		cv_mask_image : [OpenCV Image]
 		point : [(x, y)]
 		Returns : [OpenCV Image]
 		"""
+		print("overlay")
 		overlay_height, overlay_width = cv_overlay_image.shape[:2]
 
-		# OpenCV形式の画像をPIL形式に変換(α値含む)
-		# 背景画像
-		cv_rgb_bg_image = cv.cvtColor(cv_background_image, cv.COLOR_BGR2RGB)
-		pil_rgb_bg_image = Image.fromarray(cv_rgb_bg_image)
-		pil_rgba_bg_image = pil_rgb_bg_image.convert('RGBA')
-		# オーバーレイ画像
-		cv_rgb_ol_image = cv.cvtColor(cv_overlay_image, cv.COLOR_BGRA2RGBA)
-		pil_rgb_ol_image = Image.fromarray(cv_rgb_ol_image)
-		pil_rgba_ol_image = pil_rgb_ol_image.convert('RGBA')
+		cv_bgr_result_image = cv_background_image.copy()
 
-		# composite()は同サイズ画像同士が必須のため、合成用画像を用意
-		pil_rgba_bg_temp = Image.new('RGBA', pil_rgba_bg_image.size,
-										(255, 255, 255, 0))
-		# 座標を指定し重ね合わせる
-		pil_rgba_bg_temp.paste(pil_rgba_ol_image, point, pil_rgba_ol_image)
-		result_image = \
-			Image.alpha_composite(pil_rgba_bg_image, pil_rgba_bg_temp)
-
-		# OpenCV形式画像へ変換
-		cv_bgr_result_image = cv.cvtColor(np.asarray(result_image), cv.COLOR_RGBA2BGRA)
+		print("overlay2")
+		cv_bgr_result_image[point[1]:overlay_height + point[1],point[0]:overlay_width + point[0]] *= 1 - cv_mask_image
+		print("overlay3")
+		cv_bgr_result_image[point[1]:overlay_height + point[1],point[0]:overlay_width + point[0]] += cv_overlay_image * cv_mask_image
+		
 		return cv_bgr_result_image
 
 ##
@@ -287,11 +277,10 @@ class FireworksGenerator(OpenRTM_aist.DataFlowComponentBase):
 		global image
 		global cv_background_image
 		global cv_overlay_image
-		global filelist
+		global dirlist_len
 		global plist
-		# global overlay_size_x
-		# global overlay_size_y
 		global image_list
+		global mask_list
 
 
 		cv_background_image = cv.imread("srcImage\\base\\" + "toyosuC2.jpg",cv.IMREAD_UNCHANGED)
@@ -299,11 +288,13 @@ class FireworksGenerator(OpenRTM_aist.DataFlowComponentBase):
 		image = cv_background_image
 		
 		path = "srcImage\\deco\\"
-		filelist = []
+		dirlist = []
 		for f in os.listdir(path):
 			if os.path.isdir(os.path.join(path, f)):
-				filelist.append(f)
-		print(filelist)
+				dirlist.append(f)
+		print(dirlist)
+		dirlist_len = len(dirlist)
+		# dirlist_len は花火の種類の数
 
 		plist = []
 
@@ -313,18 +304,24 @@ class FireworksGenerator(OpenRTM_aist.DataFlowComponentBase):
 		# 画像をimreadして配列に保存
 		# cv_overlay_image = cv.resize(cv_overlay_image, dsize=(overlay_size, overlay_size))
 		image_list = []
-		for f_num in filelist:
+		mask_list = []
+		for f_num in dirlist:
 			images = []
+			masks = []
 			i_path = "srcImage\\deco\\" + f_num + "\\*.png"
 			for i_num in glob.glob(i_path):
 				# print(i_num) # 読み込む画像のpath
 				img = cv.imread(i_num, cv.IMREAD_UNCHANGED)
-				# print(img)
-				# img = cv.resize(img, dsize=(960, 540))
-				# img = cv.resize(img, (overlay_size_x, overlay_size_y))
-				img = cv.resize(img, (self._OVERLAY_IMAGE_SIZE_W[0], self._OVERLAY_IMAGE_SIZE_H[0]))
+				img = cv.resize(img, (self._OVERLAY_IMAGE_SIZE_W[0], self._OVERLAY_IMAGE_SIZE_H[0]))				
+				mask = img[:,:,3]
+				mask = cv.cvtColor(mask,cv.COLOR_GRAY2BGR)
+				mask = mask / 255
+				mask = mask.astype('uint8')
+				img = img[:,:,:3]
 				images.append(img)
+				masks.append(mask)
 			image_list.append(images)
+			mask_list.append(masks)
 		print("complete image load")
 		cv.namedWindow("decorate",cv.WINDOW_KEEPRATIO)
 		cv.imshow("decorate", image)
@@ -362,16 +359,10 @@ class FireworksGenerator(OpenRTM_aist.DataFlowComponentBase):
 		global image
 		global cv_background_image
 		global cv_overlay_image
-		global filelist
+		global dirlist_len
 		global plist
-		# global overlay_size_x
-		# global overlay_size_y
 		global image_list
-		# width = 1920
-		# height = 1080
-		# width = 1280
-		# height = 960
-		# screen_width = 1640
+		global mask_list
 
 
 		if self._PosIn.isNew():
@@ -380,15 +371,17 @@ class FireworksGenerator(OpenRTM_aist.DataFlowComponentBase):
 			x = int(self._WINDOW_SIZE_W[0] - (Pos.data[0] * (self._WINDOW_SIZE_W[0] / self._SCREEN_SIZE_W[0])))
 			y = int((Pos.data[1] + self._GAP[0]) * (self._WINDOW_SIZE_H[0] / self._SCREEN_SIZE_H[0]))
 			# if 0.5*self._OVERLAY_IMAGE_SIZE_W[0] < x < self._WINDOW_SIZE_W[0] - 0.5*self._OVERLAY_IMAGE_SIZE_W[0] and 0.5*self._OVERLAY_IMAGE_SIZE_H[0] < y < self._WINDOW_SIZE_H[0] - 0.5*self._OVERLAY_IMAGE_SIZE_H[0]:
-			plist.append([x,y,random.randrange(len(filelist)),0])
+			plist.append([x,y,random.randrange(dirlist_len),0])
 		if not len(plist) == 0:
 			print(plist)
 			for flist in plist:
-				point = (flist[0] - int(0.5 * self._OVERLAY_IMAGE_SIZE_W[0]),flist[1] - int(0.5 * self._OVERLAY_IMAGE_SIZE_H[0]))#座標が中心に来る
+				# point = (flist[0] - int(0.5 * self._OVERLAY_IMAGE_SIZE_W[0]),flist[1] - int(0.5 * self._OVERLAY_IMAGE_SIZE_H[0]))#座標が中心に来る
+				point = [flist[0] - int(0.5 * self._OVERLAY_IMAGE_SIZE_W[0]),flist[1] - int(0.5 * self._OVERLAY_IMAGE_SIZE_H[0])]#座標が中心に来る				
 				cv_overlay_image = image_list[flist[2]][flist[3]]
+				cv_mask_image = mask_list[flist[2]][flist[3]]
 				flist[3] += 1
 				print(flist[3])
-				image = CvOverlayImage.overlay(image, cv_overlay_image,point)
+				image = CvOverlayImage.overlay(image, cv_overlay_image, cv_mask_image, point)
 			# cv.imshow("decorate", cv.resize(image, (1280, 960)))
 			cv.imshow("decorate", image)
 			# print("imshow")
